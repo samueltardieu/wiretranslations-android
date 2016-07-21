@@ -1,0 +1,64 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 23
+        versionCode System.getenv("BUILD_NUMBER") as Integer ?: 1
+        versionName "1." + android.defaultConfig.versionCode
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+ext {
+    mavenVersion = "1." + System.getenv("BUILD_NUMBER")
+}
+
+dependencies {
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifacts {
+                groupId 'com.wire'
+                artifactId 'wiretranslations'
+                version mavenVersion
+                artifact 'build/outputs/aar/lib-release.aar'
+            }
+        }
+    }
+
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    publications = ['maven']
+    pkg {
+        userOrg = 'wire-android'
+        repo = 'releases'
+        name = 'wiretranslations'
+        licenses = ['GPL-3.0']
+        vcsUrl = 'https://github.com/wireapp'
+    }
+}
